@@ -1,61 +1,65 @@
-import React from 'react';
 import FeedbackOptions from 'components/FeedbackOptions/FeedbackOptions';
 import Statistics from 'components/Statistics/Statistics';
 import Section from 'components/Section/Section';
 import Notification from 'components/Notification/Notification';
+import { useState } from 'react';
 
-class App extends React.Component {
-  state = {
-    good: 0,
-    neutral: 0,
-    bad: 0,
-  };
+const App = () => {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
 
   // вместо option мы принимаем или good/neutral/bad
-  onLeaveFeedback = option => {
-    //  console.log(option);
-    this.setState(prevState => ({
-      [option]: prevState[option] + 1,
-    }));
+  const onLeaveFeedback = option => {
+    switch (option) {
+      case 'good':
+        setGood(good + 1);
+        break;
+      case 'neutral':
+        setNeutral(neutral + 1);
+        break;
+      case 'bad':
+        setBad(bad + 1);
+        break;
+      default:
+        return;
+    }
   };
 
-  countTotalFeedback = () => {
-    return this.state.good + this.state.neutral + this.state.bad;
+  const countTotalFeedback = () => {
+    return good + neutral + bad;
   };
 
-  countPositiveFeedbackPercentage = () => {
-    const sum = this.countTotalFeedback();
-    return Math.floor((this.state.good / sum) * 100);
+  const countPositiveFeedbackPercentage = () => {
+    const sum = countTotalFeedback();
+    return Math.floor((good / sum) * 100);
   };
 
-  render() {
-    const { good, neutral, bad } = this.state;
-    return (
-      <div>
-        <Section title="Please leave feedback">
-          <FeedbackOptions
-            options={Object.keys(this.state)}
-            //  не вызывать функцию и не делать ее стрелочной, чтобы не было зацикливания
-            onLeaveFeedback={this.onLeaveFeedback}
+  return (
+    <div>
+      <Section title="Please leave feedback">
+        <FeedbackOptions
+          options={['good', 'neutral', 'bad']}
+          //  не вызывать функцию и не делать ее стрелочной, чтобы не было зацикливания
+          onLeaveFeedback={onLeaveFeedback}
+        />
+      </Section>
+
+      <Section title="Statistics">
+        {countTotalFeedback() ? (
+          <Statistics
+            good={good}
+            neutral={neutral}
+            bad={bad}
+            total={countTotalFeedback()}
+            positivePercentage={countPositiveFeedbackPercentage()}
           />
-        </Section>
-
-        <Section title="Statistics">
-          {this.countTotalFeedback() ? (
-            <Statistics
-              good={good}
-              neutral={neutral}
-              bad={bad}
-              total={this.countTotalFeedback()}
-              positivePercentage={this.countPositiveFeedbackPercentage()}
-            />
-          ) : (
-            <Notification message="There is no feedback" />
-          )}
-        </Section>
-      </div>
-    );
-  }
-}
+        ) : (
+          <Notification message="There is no feedback" />
+        )}
+      </Section>
+    </div>
+  );
+};
 
 export default App;
